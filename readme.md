@@ -1,72 +1,49 @@
-# 🎮 Tetris Game on STM32F429I-DISC1 using TouchGFX
+# TouchGFX Clock - STM32F429I-DISC1
 
-## 📌 Mục tiêu
+## Mô tả
 
-Phát triển trò chơi **Tetris cổ điển** trên kit **STM32F429I-DISC1**, sử dụng giao diện đồ họa TouchGFX và điều khiển bằng **4 nút bấm cứng**.  
-Trò chơi bao gồm:
-- Hiển thị khối Tetris theo thời gian thực.
-- Điều khiển bằng 4 nút: trái, phải, xoay, rơi nhanh.
-- Lưu và hiển thị điểm số.
-- Phát âm thanh khi ghi điểm (nâng cao).
-- Sử dụng **RNG phần cứng** của STM32F4 để sinh khối ngẫu nhiên.
-- (Tuỳ chọn) Lưu highscore trong bộ nhớ flash hoặc backup SRAM.
+Triển khai giao diện đồng hồ analog đơn giản trên bo mạch STM32F429I-DISC1 sử dụng TouchGFX. Kim giây được điều khiển qua nút nhấn vật lý và cập nhật thời gian thực bằng FreeRTOS và bộ hẹn giờ phần cứng.
 
-## 🧰 Yêu cầu phần cứng
+## Tính năng
 
-- STM32F429I-DISC1 (có tích hợp LCD 2.4”)
-- 4 nút bấm ngoài gắn vào GPIO
-- Loa hoặc buzzer (nối DAC hoặc PWM)
-- Dây jumper để kết nối GPIO
-- Nguồn 5V hoặc kết nối qua USB
+- Giao diện đồng hồ analog với kim giây quay.  
+- Kim giây đứng yên khi không có thao tác.  
+- Khi nhấn nút PA0, kim giây sẽ quay với tần số 1 giây/lần.  
+- Góc quay được tính dựa trên thời gian hoạt động của hệ thống.  
+- Giao tiếp giữa các task trong FreeRTOS sử dụng hàng đợi (Queue).
 
+## Kiến trúc
 
-## 🧩 Tính năng
+- **TouchGFX Designer**: Thiết kế giao diện đồng hồ.  
+- **STM32CubeIDE**: Môi trường lập trình chính, cấu hình HAL và FreeRTOS.  
+- **FreeRTOS**:  
+  - `defaultTask` kiểm tra trạng thái nút PA0 và gửi lệnh qua queue.  
+  - `Queue1Handle` truyền lệnh 'P' đến giao diện GUI.  
+- **Screen1View::handleTickEvent**:  
+  - Gọi mỗi frame, nhận lệnh từ queue và cập nhật góc quay kim giây.
 
-### ✅ Đã hoàn thành:
-- Hiển thị lưới và các khối Tetris trên màn hình LCD
-- Điều khiển bằng 4 nút GPIO: trái, phải, xoay, rơi nhanh
-### 🚧 Đang phát triển:
-- Logic kiểm tra va chạm, di chuyển, sinh khối ngẫu nhiên
-- Tính điểm khi xoá hàng
-- Lưu high score vào Flash hoặc Backup SRAM
-- Âm thanh khi xoá hàng
-- Tăng tốc độ theo thời gian
+## Yêu cầu phần cứng
 
-## 🎮 Điều khiển
+- Bo mạch STM32F429I-DISC1  
+- Cáp USB  
+- Màn hình LCD tích hợp tương thích TouchGFX  
+- Nút nhấn gắn sẵn trên chân PA0
 
-| Nút bấm | GPIO | Chức năng |
-|---------|------|-----------|
-| Left    | PB0  | Di chuyển khối sang trái |
-| Right   | PB1  | Di chuyển khối sang phải |
-| Down    | PB2  | Làm khối rơi nhanh hơn |
-| Rotate  | PB3  | Xoay khối theo chiều kim đồng hồ |
+## Hướng dẫn sử dụng
 
-## 📈 Tính điểm
+1. Mở dự án trong **STM32CubeIDE**.  
+2. Tùy chỉnh giao diện bằng **TouchGFX Designer** nếu cần.  
+3. Biên dịch và nạp chương trình vào bo mạch.  
+4. Nhấn nút PA0 để bắt đầu quay kim đồng hồ.
 
-| Sự kiện | Điểm |
-|---------|------|
-| Xóa 1 hàng | +100 |
+## Trạng thái dự án
+- Đã hoàn thành nguyên mẫu chạy ổn định.  
+- Có thể mở rộng thêm:  
+  - Kim phút và kim giờ  
+  - Đồng hồ thực (RTC)  
+  - Nút điều khiển trên giao diện TouchGFX
+## Giấy phép
 
-## 🔊 Âm thanh 
+Dự án này chỉ phục vụ mục đích học tập, không dùng cho mục đích thương mại.
 
-## 🔐 Lưu điểm cao (high score)
-
-## 🖼️ Giao diện
-- Lưới game: 10x20 ô khối, mỗi ô 16x16 px
-- Giao diện tối giản, dễ nhìn, cập nhật mỗi frame
-
-## 💡 Kỹ thuật hiển thị
-
-- `getGrid()` trả về mảng 2 chiều `grid[20][10]`
-- Trong `updateGrid()`, lặp qua từng hàng/cột:
-  - Nếu giá trị != 0 → hiển thị Box/Image
-  - Nếu bằng 0 → ẩn
-- Dùng `block[row][col].setColor()để thay đổi hiển thị theo loại khối
-
-## 📜 Giấy phép
-
-Dự án này dành cho mục đích học tập, nghiên cứu vi điều khiển và giao diện đồ họa nhúng.  
-Có thể sử dụng, sửa đổi tự do với mục đích cá nhân hoặc giáo dục.
-
-
-
+---
