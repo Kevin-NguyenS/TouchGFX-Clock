@@ -42,8 +42,4 @@ Triển khai giao diện đồng hồ analog đơn giản trên bo mạch STM32F
   - Kim phút và kim giờ  
   - Đồng hồ thực (RTC)  
   - Nút điều khiển trên giao diện TouchGFX
-## Giấy phép
-
-Dự án này chỉ phục vụ mục đích học tập, không dùng cho mục đích thương mại.
-
 ---
